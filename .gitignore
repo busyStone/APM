@@ -64,14 +64,12 @@ Build.APMrover2/*
 cmake_install.cmake
 CMakeCache.txt
 CMakeFiles
-config.mk
 dataflash.bin
 eeprom.bin
 LASTLOG.TXT
 Make.dep
 mav.log
 mav.log.raw
-module.mk
 serialsent.raw
 status.txt
 tags
