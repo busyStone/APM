@@ -40,5 +40,12 @@ void userhook_SlowLoop()
 void userhook_SuperSlowLoop()
 {
     // put your 1Hz code here
+    static AP_Z60_AnalogSource *pZ60 = NULL;
+    
+    if (NULL == pZ60) {
+        pZ60 = battery.get_z60();
+    } else {
+        pZ60->run();
+    }
 }
 #endif

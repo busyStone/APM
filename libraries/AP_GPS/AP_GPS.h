@@ -32,7 +32,7 @@
    than 1 then redundent sensors may be available
  */
 #if HAL_CPU_CLASS > HAL_CPU_CLASS_16
-#define GPS_MAX_INSTANCES 2
+#define GPS_MAX_INSTANCES 1
 #else
 #define GPS_MAX_INSTANCES 1
 #endif
@@ -291,9 +291,8 @@ public:
     AP_Int8 _navfilter;
 #if GPS_MAX_INSTANCES > 1
     AP_Int8 _auto_switch;
-    AP_Int8 _min_dgps;
 #endif
-    
+    AP_Int8 _min_dgps;
     // handle sending of initialisation strings to the GPS
     void send_blob_start(uint8_t instance, const prog_char *_blob, uint16_t size);
     void send_blob_update(uint8_t instance);

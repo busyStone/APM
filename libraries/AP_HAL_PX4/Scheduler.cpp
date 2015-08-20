@@ -293,7 +293,7 @@ void PX4Scheduler::_run_io(void)
 void *PX4Scheduler::_uart_thread(void)
 {
     while (!_hal_initialized) {
-        poll(NULL, 0, 1);        
+        poll(NULL, 0, 1);
     }
     while (!_px4_thread_should_exit) {
         delay_microseconds_semaphore(1000);

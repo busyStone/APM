@@ -72,12 +72,13 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] PROGMEM = {
 // Note that the Vector/Matrix constructors already implicitly zero
 // their values.
 //
-AP_BattMonitor::AP_BattMonitor(void) :
+AP_BattMonitor::AP_BattMonitor() :
     _voltage(0),
     _voltage2(0),
     _current_amps(0),
     _current_total_mah(0),
-    _last_time_micros(0)
+    _last_time_micros(0),
+    _z60(NULL)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
@@ -93,6 +94,8 @@ AP_BattMonitor::init()
     } else {
         _volt2_pin_analog_source = NULL;
     }
+
+    _z60 = new AP_Z60_AnalogSource(hal.uartE);
 }
 
 // read - read the voltage and current
@@ -107,7 +110,8 @@ AP_BattMonitor::read()
     if (_monitoring == AP_BATT_MONITOR_VOLTAGE_ONLY || _monitoring == AP_BATT_MONITOR_VOLTAGE_AND_CURRENT) {
         // this copes with changing the pin at runtime
         _volt_pin_analog_source->set_pin(_volt_pin);
-        _voltage = _volt_pin_analog_source->voltage_average() * _volt_multiplier;
+        //_voltage = _volt_pin_analog_source->voltage_average() * _volt_multiplier;
+        _voltage = _z60->voltage_average();
         if (_volt2_pin_analog_source != NULL) {
             _voltage2 = _volt2_pin_analog_source->voltage_average() * _volt2_multiplier;
         }
@@ -115,23 +119,15 @@ AP_BattMonitor::read()
 
     // read current
     if (_monitoring == AP_BATT_MONITOR_VOLTAGE_AND_CURRENT) {
-        uint32_t tnow = hal.scheduler->micros();
-        float dt = tnow - _last_time_micros;
-        // this copes with changing the pin at runtime
-        _curr_pin_analog_source->set_pin(_curr_pin);
-        _current_amps = (_curr_pin_analog_source->voltage_average()-_curr_amp_offset)*_curr_amp_per_volt;
-        if (_last_time_micros != 0 && dt < 2000000.0f) {
-            // .0002778 is 1/3600 (conversion to hours)
-            _current_total_mah += _current_amps * dt * 0.0000002778f;
-        }
-        _last_time_micros = tnow;
+        _current_amps = _z60->read_current_amps();
+        _current_total_mah = _z60->read_current_total_mah();
     }
 }
 
 /// capacity_remaining_pct - returns the % battery capacity remaining (0 ~ 100)
 uint8_t AP_BattMonitor::capacity_remaining_pct() const
 {
-    return (100.0f * (_pack_capacity - _current_total_mah) / _pack_capacity);
+    return _z60->read_remains_pct();
 }
 
 /// exhausted - returns true if the voltage remains below the low_voltage for 10 seconds or remaining capacity falls below min_capacity_mah
@@ -175,4 +171,8 @@ bool AP_BattMonitor::voltage2(float &v) const
         return true;
     }
     return false;
+}
+
+AP_Z60_AnalogSource* AP_BattMonitor::get_z60() {
+    return _z60;
 }

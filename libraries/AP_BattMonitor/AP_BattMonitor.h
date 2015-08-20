@@ -8,6 +8,7 @@
 #include <AP_Math.h>                // ArduPilot Mega Vector/Matrix math Library
 #include <AP_ADC.h>                 // ArduPilot Mega Analog to Digital Converter Library
 #include <AP_ADC_AnalogSource.h>
+#include <AP_Z60_AnalogSource.h>
 
 // battery monitor types
 #define AP_BATT_MONITOR_DISABLED            0
@@ -136,6 +137,8 @@ public:
 
     static const struct AP_Param::GroupInfo var_info[];
 
+    AP_Z60_AnalogSource *get_z60();
+
 protected:
 
     /// parameters
@@ -162,5 +165,7 @@ protected:
     AP_HAL::AnalogSource *_volt_pin_analog_source;
     AP_HAL::AnalogSource *_curr_pin_analog_source;
     AP_HAL::AnalogSource *_volt2_pin_analog_source;
+
+    AP_Z60_AnalogSource *_z60;
 };
 #endif  // AP_BATTMONITOR_H
